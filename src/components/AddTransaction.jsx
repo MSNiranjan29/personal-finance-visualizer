@@ -4,14 +4,32 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+const presetCategories = [
+  'Food',
+  'Rent',
+  'Utilities',
+  'Salary',
+  'Transportation',
+  'Entertainment',
+  'Shopping',
+  'Healthcare',
+  'Investment',
+  'Custom',
+];
+
 export default function AddTransaction({ onTransactionAdded }) {
   const [formData, setFormData] = useState({
     amount: '',
     description: '',
+    category: '',
     date: new Date().toISOString().split('T')[0],
   });
+
+  const [selectedPreset, setSelectedPreset] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+
+  const isCustom = selectedPreset === 'Custom';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,15 +51,15 @@ export default function AddTransaction({ onTransactionAdded }) {
         throw new Error(errorData.error || 'Error adding transaction.');
       }
 
-      // Success
       setMessage('Transaction added successfully!');
       setFormData({
         amount: '',
         description: '',
+        category: '',
         date: new Date().toISOString().split('T')[0],
       });
+      setSelectedPreset('');
 
-      // Call parent’s handler to refresh the list, play beep, etc.
       if (onTransactionAdded) {
         onTransactionAdded();
       }
@@ -61,9 +79,7 @@ export default function AddTransaction({ onTransactionAdded }) {
           <Input
             type="number"
             value={formData.amount}
-            onChange={(e) =>
-              setFormData({ ...formData, amount: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
             required
             className="w-full"
             step="0.01"
@@ -80,6 +96,41 @@ export default function AddTransaction({ onTransactionAdded }) {
             className="w-full"
           />
         </div>
+
+        <div>
+          <Label className="block mb-1">Category</Label>
+          <select
+            value={selectedPreset}
+            onChange={(e) => {
+              const value = e.target.value;
+              setSelectedPreset(value);
+              setFormData({
+                ...formData,
+                category: value === 'Custom' ? '' : value,
+              });
+            }}
+            className="w-full p-2 border rounded"
+          >
+            <option value="">-- Select a Category --</option>
+            {presetCategories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+          {isCustom && (
+            <Input
+              placeholder="Enter custom category"
+              value={formData.category}
+              onChange={(e) =>
+                setFormData({ ...formData, category: e.target.value })
+              }
+              className="mt-2"
+              required
+            />
+          )}
+        </div>
+
         <div>
           <Label className="block mb-1">Date</Label>
           <Input

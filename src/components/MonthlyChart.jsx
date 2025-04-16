@@ -123,19 +123,21 @@ export default function MonthlyChart({ transactions = [], highlightMonth }) {
   );
 }
 
-// Monthly aggregation
+// Monthly aggregation (in order)
 function getMonthlyData(transactions) {
   const monthlyTotals = {};
 
   for (const tx of transactions) {
     const date = parseISO(tx.date);
-    const monthStr = format(date, 'MMM');
+    const monthStr = format(date, 'MMM'); // e.g., Jan, Feb
     monthlyTotals[monthStr] = (monthlyTotals[monthStr] || 0) + Math.abs(tx.amount);
   }
 
-  return Object.entries(monthlyTotals).map(([name, amount]) => ({
-    name,
-    amount: parseFloat(amount.toFixed(2))
+  const orderedMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  return orderedMonths.map((month) => ({
+    name: month,
+    amount: parseFloat((monthlyTotals[month] || 0).toFixed(2))
   }));
 }
 

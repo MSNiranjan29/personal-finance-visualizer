@@ -3,6 +3,10 @@ import { useState, useEffect } from 'react';
 import AddTransaction from '@/components/AddTransaction';
 import MonthlyChart from '@/components/MonthlyChart';
 import TransactionList from '@/components/TransactionList';
+import SummaryCards from '@/components/SummaryCards';
+import CategoryPieChart from '@/components/CategoryPieChart';
+import BudgetComparisonChart from '@/components/BudgetComparisonChart';
+import SpendingInsights from '@/components/SpendingInsights';
 
 const BEEP_SOUND_URL = 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg';
 
@@ -53,9 +57,7 @@ export default function Dashboard() {
     setHighlightMonth(monthStr);
   };
 
-  // ✅ Correctly pick the newest transaction since MongoDB sort is descending by date
-  const latestTransaction =
-    transactions.length > 0 ? [transactions[0]] : [];
+  const latestTransaction = transactions.length > 0 ? [transactions[0]] : [];
 
   return (
     <main className="w-full h-screen overflow-hidden flex flex-col bg-gray-100">
@@ -80,9 +82,9 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* SIDEBAR OVERLAY */}
+        {/* SIDEBAR OVERLAY FOR RECENT Transactions */}
         <div
-          className={`fixed top-0 left-0 h-full bg-white shadow-lg w-80 z-50 transform transition-transform duration-300 ${
+          className={`fixed top-0 left-0 h-full bg-white shadow-lg w-4/5 sm:w-2/3 md:w-1/2 lg:w-1/3 z-50 transform transition-transform duration-300 ${
             showOverlay ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
@@ -111,18 +113,15 @@ export default function Dashboard() {
         </div>
 
         {/* MAIN CONTENT AREA */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex flex-1 overflow-hidden">
-            {/* LEFT 30% */}
-            <div className="w-1/3 p-6 flex flex-col gap-4 overflow-y-auto">
-              {/* Add Transaction */}
-              <div className="bg-white rounded shadow p-6">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex flex-1 flex-col lg:flex-row overflow-hidden">
+            {/* LEFT PANEL - ADD TRANSACTION + SUMMARY */}
+            <div className="w-full lg:w-1/3 p-4 flex flex-col gap-4 overflow-y-auto">
+              <div className="bg-white rounded shadow p-4">
                 <AddTransaction onTransactionAdded={handleTransactionAdded} />
               </div>
-
-              {/* Latest Transaction */}
               <div className="bg-white rounded shadow p-4">
-                <h3 className="font-semibold text-lg mb-2">Previous Transaction</h3>
+                <h3 className="font-semibold text-lg mb-2">Latest Transaction</h3>
                 {loading ? (
                   <p>Loading...</p>
                 ) : latestTransaction.length > 0 ? (
@@ -134,11 +133,12 @@ export default function Dashboard() {
                   <p className="text-gray-500 text-sm">No transactions yet.</p>
                 )}
               </div>
+              <SummaryCards transactions={transactions} />
             </div>
 
-            {/* RIGHT 70% */}
-            <div className="w-2/3 p-6">
-              <div className="bg-white rounded shadow p-6 h-full flex flex-col">
+            {/* RIGHT PANEL - CHARTS */}
+            <div className="w-full lg:w-2/3 p-4 overflow-y-auto space-y-6">
+              <div className="bg-white rounded shadow p-4 h-64">
                 {error && <p className="text-red-600 mb-2">{error}</p>}
                 {loading ? (
                   <p>Loading...</p>
@@ -148,6 +148,24 @@ export default function Dashboard() {
                     highlightMonth={highlightMonth}
                   />
                 )}
+              </div>
+
+              <div className="bg-white rounded shadow p-4 h-[28rem] flex flex-col">
+                <h2 className="text-xl font-bold mb-2">Expenses by Category</h2>
+                <div className="flex-1">
+                  <CategoryPieChart transactions={transactions} />
+                </div>
+              </div>
+
+              <div className="bg-white rounded shadow p-4 h-64 flex flex-col">
+                <h2 className="text-xl font-bold mb-2">Budget vs Actual</h2>
+                <div className="flex-1">
+                  <BudgetComparisonChart transactions={transactions} />
+                </div>
+              </div>
+
+              <div className="bg-white rounded shadow p-4">
+                <SpendingInsights transactions={transactions} />
               </div>
             </div>
           </div>
