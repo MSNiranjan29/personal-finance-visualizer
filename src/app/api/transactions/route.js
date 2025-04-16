@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import Transaction from '@/models/Transaction';
 import dbConnect from '@/lib/dbConnect';
 
-// Unified route handler
 export async function GET(req) {
   await dbConnect();
 
@@ -30,7 +29,13 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const transaction = await Transaction.create(body);
+
+    const parsedBody = {
+      ...body,
+      date: new Date(body.date), // 🔥 This line fixes the date issue
+    };
+
+    const transaction = await Transaction.create(parsedBody);
     return NextResponse.json(transaction);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
@@ -49,7 +54,14 @@ export async function PUT(req) {
   }
 
   try {
-    const updated = await Transaction.findByIdAndUpdate(id, body, { new: true });
+    const updated = await Transaction.findByIdAndUpdate(
+      id,
+      {
+        ...body,
+        date: new Date(body.date),
+      },
+      { new: true }
+    );
     if (!updated) {
       return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
     }

@@ -53,9 +53,9 @@ export default function Dashboard() {
     setHighlightMonth(monthStr);
   };
 
-  // Get latest transaction
+  // ✅ Correctly pick the newest transaction since MongoDB sort is descending by date
   const latestTransaction =
-  transactions.length > 0 ? [transactions[transactions.length - 1]] : [];
+    transactions.length > 0 ? [transactions[0]] : [];
 
   return (
     <main className="w-full h-screen overflow-hidden flex flex-col bg-gray-100">
